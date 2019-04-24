@@ -15,11 +15,13 @@ df_all$canceled <- as.numeric(df_all$canceled)
 global_canceled <- aggregate(canceled~order_hour, df_all, FUN = 'sum')
 
 server <- function(input, output) {
+  
   df <- df_all
-  
-  
   #waittimes
   output$plot1 <- renderPlot({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
     if(input$waitTimeSwitch == 1)
     {
       df_loc <- df[df$driver_wait_time < 15,]
@@ -44,15 +46,23 @@ server <- function(input, output) {
   
   #ordertimes
   output$plot2 <- renderPlot({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
     ggplot(df, aes(x=order_hour)) + geom_histogram(bins = 20) + coord_polar() + gg_theme
   }, bg='transparent')
   ########
   
   #ridedurations
-  df_agg_duration <- aggregate(ride_duration~order_hour, df, FUN = 'mean')
   output$plot3 <- renderPlot({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    df_agg_duration <- aggregate(ride_duration~order_hour, df, FUN = 'mean')
     ggplot(df_agg_duration, aes(x=order_hour, y=ride_duration)) + 
-      geom_point() + geom_line() + gg_theme
+      geom_point() + geom_line() +
+      geom_line(data = global_ride_duration, 
+                aes(x=order_hour, y=ride_duration, alpha=0.2, color='red', linetype='dotted')) +
+      gg_theme
   })
   #############
   
@@ -60,16 +70,25 @@ server <- function(input, output) {
   ############
   
   #prices
-  df_agg_price <- aggregate(fare~order_hour, df, FUN = 'mean')
   output$plot4 <- renderPlot({
-    ggplot(df_agg_price, aes(x=order_hour, y=fare)) + geom_point() + geom_line() + gg_theme
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
+    df_agg_price <- aggregate(fare~order_hour, df, FUN = 'mean')
+    ggplot(df_agg_price, aes(x=order_hour, y=fare)) + geom_point() + geom_line() +
+    geom_line(data = global_fare, 
+              aes(x=order_hour, y=fare, alpha=0.2, color='red', linetype='dotted')) +
+      gg_theme
   })
   ######
   
   #cancelations
-  df$canceled <- as.numeric(df$canceled)
-  df_agg_canceled <- aggregate(canceled~order_hour, df, FUN = 'sum')
+ 
   output$plot5 <- renderPlot({
+    df$canceled <- as.numeric(df$canceled)
+    df_agg_canceled <- aggregate(canceled~order_hour, df, FUN = 'sum')
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
     ggplot(df_agg_canceled, aes(x=order_hour, y=canceled)) + 
       geom_point() + geom_line() + coord_polar() + gg_theme
   })

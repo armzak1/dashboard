@@ -5,13 +5,13 @@ ui <- dashboardPage(
                  choices = list("Driver" = 1, "Passenger" = 2), 
                  selected = 1, inline=TRUE),
     dateRangeInput('dateRange', label = 'Date Range',
-                   start = '2016-02-01', end='2016-04-01',
+                   start = '2016-02-01', end='2016-02-07',
                    min = min(df_all$created_at), max = max(df_all$created_at)
                    )
   ),
   dashboardBody( # Boxes need to be put in a row (or column)
     fluidPage(
-      textOutput('arman'),
+      renderText({('input$dateRange[1]')}),
       plotOutput("plot1", height = 250, width=300),
       hr(),
       hr(),
