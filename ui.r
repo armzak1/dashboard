@@ -11,16 +11,49 @@ ui <- dashboardPage(
   ),
   dashboardBody( # Boxes need to be put in a row (or column)
     fluidPage(
-      renderText({('input$dateRange[1]')}),
-      plotOutput("plot1", height = 250, width=300),
+      wellPanel(
+        fluidRow( 
+          column(width=3,
+            mainPanel(
+              p('Total Orders', align = 'center'),
+              p('1000', align = 'center')
+              )
+            ),
+          column(width=3,
+                 mainPanel(
+                   p('Canceled Orders', align = 'center'),
+                   p('1000', align = 'center')
+                 )
+            ),
+          column(width=3,
+                 mainPanel(
+                   p('Avg. Wait Time', align = 'center'),
+                   p('1000', align = 'center')
+                 )
+          ),
+          column(width=3,
+                 mainPanel(
+                   p('Total Revenue', align = 'center'),
+                   p('1000', align = 'center')
+                 )
+          )
+          
+        )
+      ),
       hr(),
+      wellPanel(
+        fluidRow(
+          column(6, plotOutput("plot2")),
+          column(6, plotOutput("plot5"))
+        )
+      ),
       hr(),
-      plotOutput('plot2', height = 250, width = 300),
+      #plotOutput('plot2', height = 250, width = 300),
       hr(),
-      plotOutput('plot3', height = 250, width=300),
+      plotOutput('plot3', height = 250, width='100%'),
       hr(),
-      plotOutput('plot4', height = 250, width = 300),
+      plotOutput('plot4', height = 250, width = '100%'),
       hr(),
-      plotOutput('plot5', height = 250, width = 300)
+      plotOutput("plot1", height = 250, width=300)
     ))
 )
