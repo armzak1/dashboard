@@ -43,16 +43,16 @@ ui <- dashboardPage(
       hr(),
       wellPanel(
         fluidRow(
-          column(6, plotOutput("plot2")),
-          column(6, plotOutput("plot5"))
-        )
+          column(3, plotOutput("plot2"), div(style='height:2px;')),
+          column(9, plotOutput("plot4"), div(style='height:2px;'))
+        ), style='height:250px;'
       ),
       hr(),
       #plotOutput('plot2', height = 250, width = 300),
       hr(),
-      plotOutput('plot3', height = 250, width='100%'),
+      #plotOutput('plot3', height = 250, width='100%'),
       hr(),
-      plotOutput('plot4', height = 250, width = '100%'),
+      plotOutput('plot3', height = 250, width = '100%'),
       hr(),
       plotOutput("plot1", height = 250, width=300)
     ))

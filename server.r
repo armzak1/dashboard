@@ -48,15 +48,18 @@ server <- function(input, output) {
   output$plot2 <- renderPlot({
     df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
                    as.Date(df_all$created_at) < input$dateRange[2],]
-    
-    ggplot(df, aes(x=order_hour)) + geom_histogram(bins = 20) + coord_polar() + gg_theme
-  }, bg='transparent')
+    Status <- factor(df$canceled, levels=c(1,2), labels=c('Completed', 'Canceled'))
+    ggplot(df, aes(x=order_hour, fill=Status)) + 
+      geom_histogram(bins = 20, position='stack') +
+      coord_polar() + gg_theme + scale_fill_manual(values=c('Green', 'Red'))
+  }, bg='transparent', height=200)
   ########
   
   #ridedurations
   output$plot3 <- renderPlot({
     df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
                    as.Date(df_all$created_at) < input$dateRange[2],]
+    
     df_agg_duration <- aggregate(ride_duration~order_hour, df, FUN = 'mean')
     ggplot(df_agg_duration, aes(x=order_hour, y=ride_duration)) + 
       geom_point() + geom_line() +
@@ -79,7 +82,7 @@ server <- function(input, output) {
     geom_line(data = global_fare, 
               aes(x=order_hour, y=fare, alpha=0.2, color='red', linetype='dotted')) +
       gg_theme
-  })
+  }, height=200)
   ######
   
   #cancelations
