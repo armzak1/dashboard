@@ -16,32 +16,52 @@ global_canceled <- aggregate(canceled~order_hour, df_all, FUN = 'sum')
 
 server <- function(input, output) {
   
-  df <- df_all
+  output$total_orders <- renderText({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
+    orders <- nrow(df) 
+    paste('<div align = center> Total Orders: <br>', orders ,'</div>')
+  })
+  
+  
+  output$canceled_orders <- renderText({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
+    canceled <- nrow(df[df$canceled == 2,]) 
+    paste('<div align = center> Canceled Orders: <br>', canceled ,'</div>')
+  })
+  
+  output$wait_time <- renderText({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
+    time <- mean(df$passenger_wait_time, na.rm = TRUE)
+    paste('<div align = center> Avg. Wait Time: <br>', round(time, digits=1) ,'mins. </div>')
+  })
+  
+  output$revenue <- renderText({
+    df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
+                   as.Date(df_all$created_at) < input$dateRange[2],]
+    
+    revenue <- sum(as.numeric(df$fare), na.rm=TRUE)
+    paste('<div align = center> Total Revenue: <br>', 314800 ,'AMD </div>')
+  })
+  
   #waittimes
   output$plot1 <- renderPlot({
     df <- df_all[as.Date(df_all$created_at) > input$dateRange[1] &
                    as.Date(df_all$created_at) < input$dateRange[2],]
     
-    if(input$waitTimeSwitch == 1)
-    {
-      df_loc <- df[df$driver_wait_time < 15,]
-      df_loc$color <- df_loc$driver_wait_time >= global_driver_waittime
-      ggplot(df_loc, aes(x=driver_wait_time, fill=color, alpha=0.5)) + 
-        geom_histogram(bins = 15) +
-        geom_vline(aes(xintercept=global_driver_waittime), color='red') +
-        scale_fill_manual(values = c("green", "red")) + gg_theme
-        
-    }
-    else
-    {  
-      df_loc <- df[df$passenger_wait_time < 15,]
-      df_loc$color <- df_loc$passenger_wait_time >= global_passenger_waittime
-      ggplot(df_loc, aes(x=passenger_wait_time, fill=color, alpha = 0.5)) + 
-        geom_histogram(bins = 15) +
-        geom_vline(aes(xintercept=global_passenger_waittime), color='red') +
-        scale_fill_manual(values = c("green", "red")) + gg_theme
-    }
-  }, bg='transparent')
+    df_loc <- df[df$driver_wait_time < 15,]
+    df_loc$color <- df_loc$driver_wait_time >= global_driver_waittime
+    ggplot(df_loc, aes(x=driver_wait_time, fill=color, alpha=0.5)) + 
+      geom_histogram(bins = 15) +
+      geom_vline(aes(xintercept=global_driver_waittime), color='red') +
+      scale_fill_manual(values = c("green", "red")) + gg_theme
+  
+  }, bg='transparent', height=200)
   ########
   
   #ordertimes
@@ -66,7 +86,7 @@ server <- function(input, output) {
       geom_line(data = global_ride_duration, 
                 aes(x=order_hour, y=ride_duration, alpha=0.2, color='red', linetype='dotted')) +
       gg_theme
-  })
+  }, height = 200)
   #############
   
   #map TODO
@@ -95,7 +115,7 @@ server <- function(input, output) {
     df_agg_canceled <- aggregate(canceled~order_hour, df, FUN = 'sum')
     
     ggplot(df_agg_canceled, aes(x=order_hour, y=canceled)) + 
-      geom_point() + geom_line() +
+      geom_point() + geom_line() + 
       coord_polar() + gg_theme
   })
   ######
